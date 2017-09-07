@@ -1,0 +1,5 @@
+/api/dist
+/api/logs
+/npm-debug.log
+/api/node_modules
+.DS_Store

@@ -1,0 +1,27 @@
+{
+	"name": "user",
+	"plural": "users",
+	"properties": {
+		"firstName": {
+			"type": "string",
+			"default": ""
+		},
+		"lastName": {
+			"type": "string",
+			"default": ""
+		},
+		"email": {
+			"type": "string",
+			"default": ""
+		},
+		"password": {
+			"type": "string"
+		},
+		"createdAt": {
+			"type": "date"
+		},
+		"updatedAt": {
+			"type": "date"
+		}
+	}
+}
