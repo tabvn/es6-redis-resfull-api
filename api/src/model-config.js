@@ -13,8 +13,7 @@ export default class Models {
             },
             // Add more model here.
         };
-
-
+        
         this.getModels = this.getModels.bind(this);
     }
 
