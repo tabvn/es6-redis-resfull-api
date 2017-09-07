@@ -1,9 +1,11 @@
 {
-	"port": 8080,
-	"bodyLimit": "100kb",
-	"corsHeaders": ["*"],
-	"db": {
-		"host": "127.0.0.1",
-		"port": 6379
-	}
+  "port": 8080,
+  "bodyLimit": "100kb",
+  "cors": [
+    "*"
+  ],
+  "db": {
+    "host": "127.0.0.1",
+    "port": 6379
+  }
 }

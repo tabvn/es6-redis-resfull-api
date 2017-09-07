@@ -3,9 +3,9 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import bodyParser from 'body-parser';
-import initializeDb from './db';
-import middleware from './middleware';
-import api from './api';
+import startApp from './server/database';
+import middleware from './server/middleware';
+import api from './server/api';
 import config from './config.json';
 
 let app = express();
@@ -16,7 +16,7 @@ app.use(morgan('dev'));
 
 // 3rd party middleware
 app.use(cors({
-    exposedHeaders: config.corsHeaders
+    exposedHeaders: config.cors
 }));
 
 app.use(bodyParser.json({
@@ -24,18 +24,15 @@ app.use(bodyParser.json({
 }));
 
 // connect to db
-initializeDb(db => {
-
+startApp(db => {
     // internal middleware
     app.set("config", config);
     app.set('db', db);
-    app.use(middleware({app}));
-
+    app.use(middleware(app));
     // api router
-    app.use('/api', api({app}));
-
+    app.use('/api', api(app));
     app.server.listen(process.env.PORT || config.port, () => {
-        console.log(`Started on port ${app.server.address().port}`);
+        console.log(`App is running on port ${app.server.address().port}`);
     });
 });
 

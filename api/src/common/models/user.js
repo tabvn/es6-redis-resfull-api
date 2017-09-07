@@ -1,5 +1,5 @@
 import modelConfig from './user.json';
-import Model from "./model";
+import Model from "../../server/database/model";
 
 class User extends Model {
     constructor(app) {
