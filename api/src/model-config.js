@@ -10,8 +10,10 @@ export default class Models {
             user: {
                 config: user,
                 model: new User(app)
-            }
+            },
+            // Add more model here.
         };
+
 
         this.getModels = this.getModels.bind(this);
     }
