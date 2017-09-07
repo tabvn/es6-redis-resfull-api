@@ -1,4 +1,5 @@
 import each from 'async/each';
+import _ from 'lodash';
 
 export default class Model {
 
@@ -8,6 +9,7 @@ export default class Model {
         this.db = app.get('db');
         this.name = config.name;
         this.plural = config.plural;
+        this.config = config;
 
         this.findAll = this.findAll.bind(this);
         this.findById = this.findById.bind(this);
@@ -17,7 +19,8 @@ export default class Model {
         this.updateById = this.updateById.bind(this);
         this.errorHandler = this.errorHandler.bind(this);
         this.responseHandler = this.responseHandler.bind(this);
-        this.router();
+        this.sort = this.sort.bind(this);
+        this.router = this.router();
     }
 
     router() {
@@ -101,26 +104,74 @@ export default class Model {
 
     findAll(filter = {}, callback) {
 
-        let models = [];
-        let db = this.db;
+        let fields = this.config.properties;
+        
+        let sortArg = [
+            this.plural,
+            "BY",
+            "*->id",
+            "ALPHA",
+            "DESC"
+        ];
 
-        this.db.smembers(this.plural, (err, objects) => {
-            each(objects, function (objKey, cb) {
+        _.each(fields, (fieldSetting, field) => {
 
-                db.hgetall(objKey, function (err, modelObject) {
-                    if (err == null && modelObject) {
-                        modelObject = Object.assign(modelObject, {});
-                        models.push(modelObject);
-                    }
-                    cb();
-                });
+            sortArg.push('GET');
+            sortArg.push('*->' + field);
 
-            }, function (err) {
-                return callback(err, models);
-            });
         });
 
+        this.sort(...sortArg, (err, values) => {
+            return callback(err, values);
+        });
     }
+
+    sort() {
+        let
+            sortArguments = Array.prototype.slice.call(arguments),
+            originalCb = Array.prototype.slice.call(arguments).slice(-1)[0],
+            fields = [];
+
+        sortArguments.splice(-1, 1);
+
+        sortArguments.forEach(function (anArgument, argumentIndex) {
+            //if the argument is some form of 'get'
+            if (anArgument.toLowerCase() === 'get') {
+                //special pattern for getting the key
+                if (sortArguments[argumentIndex + 1] === '#') {
+                    //push it into the fields array
+                    fields.push('#');
+                } else {
+                    //otherwise split the pattern by '->', retrieving the latter part
+                    //and push it into the fields object
+                    fields.push(sortArguments[argumentIndex + 1].split('->')[1]);
+                }
+            }
+        });
+
+        //run the normal sort
+        this.db.sort.apply(
+            this.db, //the `this` argument of the sort should be the client
+            [
+                sortArguments, //just the sort arguments without the callback
+                function (err, values) {
+                    if (err) {
+                        originalCb(err);
+                    } else {
+                        values = _(values)
+                            .chunk(fields.length)
+                            .map(function (aValueChunk) {
+                                return _.zipObject(fields, aValueChunk);
+                            })
+                            .value();
+                        originalCb(err, values);
+                    }
+
+                }
+            ]
+        );
+    }
+
 
     count(filter = {}, callback) {
         this.db.scard(this.plural, (err, num) => {
