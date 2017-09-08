@@ -1,5 +1,5 @@
 
-#Create Restful sevvice with Express 4,Redis Database.
+# Create Restful sevvice with Express 4,Redis Database.
  
 ``` 
 cd api
@@ -10,10 +10,10 @@ cd api
 
 ``` 
 npm run dev
+
  ```
     
 ##### Build
-```aidl
-
+```
 npm run build
 ```
