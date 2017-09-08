@@ -12,7 +12,10 @@
     },
     "email": {
       "type": "string",
-      "default": ""
+      "default": "",
+      "required": true,
+      "unique": true,
+      "index": true
     },
     "password": {
       "type": "string"

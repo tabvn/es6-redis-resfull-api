@@ -1,4 +1,3 @@
-import each from 'async/each';
 import _ from 'lodash';
 
 export default class Model {
@@ -21,6 +20,25 @@ export default class Model {
         this.responseHandler = this.responseHandler.bind(this);
         this.sort = this.sort.bind(this);
         this.router = this.router();
+        this.modelDidLoad = this.modelDidLoad.bind(this);
+        this.prepareData = this.prepareData.bind(this);
+        this.beforeSave = this.beforeSave.bind(this);
+        this.afterSave = this.afterSave.bind(this);
+    }
+
+    modelDidLoad() {
+
+    }
+
+
+    beforeSave(ctx, next) {
+
+        next();
+    }
+
+    afterSave(ctx, next) {
+        next();
+
     }
 
     router() {
@@ -52,14 +70,39 @@ export default class Model {
 
         });
 
-        router.post('/' + basePath, (req, res) => {
-            that.create(req.body, (err, obj) => {
+        router.post('/' + basePath, (req, res, next) => {
+
+
+            let ctx = {
+                req: req,
+                res: res,
+                instance: req.body
+            };
+
+            this.beforeSave(ctx, (err = null) => {
                 if (err) {
-                    return that.errorHandler(res, err, 500);
+                    this.errorHandler(res, err, 500);
                 } else {
-                    return that.responseHandler(res, obj);
+                    that.create(req.body, (err, obj) => {
+                        if (err) {
+                            return that.errorHandler(res, err, 500);
+                        } else {
+
+                            ctx.instance = obj;
+                            this.afterSave(ctx, (err = null) => {
+                                if (err) {
+                                    return this.errorHandler(res, err, 500);
+                                } else {
+                                    return that.responseHandler(res, obj);
+                                }
+                            });
+
+                        }
+                    });
+
                 }
             });
+
 
         });
 
@@ -98,6 +141,7 @@ export default class Model {
             });
         });
 
+        this.modelDidLoad();
 
     }
 
@@ -105,7 +149,7 @@ export default class Model {
     findAll(filter = {}, callback) {
 
         let fields = this.config.properties;
-        
+
         let sortArg = [
             this.plural,
             "BY",
@@ -193,27 +237,67 @@ export default class Model {
 
     }
 
+
+    prepareData(model, callback) {
+
+        let errors = [];
+        let data = {};
+
+
+        let fields = this.config.properties;
+        _.each(fields, (fieldConfig, field) => {
+
+            if (typeof fieldConfig.required !== 'undefined' && fieldConfig.required && _.isEmpty(_.get(model, field, null))) {
+                errors.push({field: field, error: field + ' is required.'});
+            }
+
+            if (typeof model[field] !== 'undefined') {
+                data[field] = model[field];
+            }
+
+        });
+
+        if (errors.length) {
+            return callback(errors);
+        } else {
+
+            return callback(null, data);
+        }
+
+
+    }
+
     create(model = {}, callback) {
 
         let db = this.db;
 
-        this.count(null, (err, count) => {
+        this.prepareData(model, (err, data) => {
+
             if (err) {
                 return callback(err);
             } else {
-                let key = this.name + ':' + count;
-                model.id = count;
-                db.hmset(key, model, (err) => {
+
+                this.count(null, (err, count) => {
                     if (err) {
                         return callback(err);
                     } else {
-                        db.sadd(this.plural, key);
-                        return callback(null, model);
+                        let key = this.name + ':' + count;
+                        model.id = count;
+                        db.hmset(key, data, (err) => {
+                            if (err) {
+                                return callback(err);
+                            } else {
+                                db.sadd(this.plural, key);
+                                return callback(null, model);
+                            }
+
+                        });
+
                     }
-
                 });
-
             }
+
+
         });
 
 
