@@ -100,7 +100,7 @@ export default class Model {
                 if (err) {
                     this.errorHandler(res, err, 500);
                 } else {
-                    that.create(req.body, (err, obj) => {
+                    that.create(ctx.instance, (err, obj) => {
                         if (err) {
                             return that.errorHandler(res, err, 500);
                         } else {
