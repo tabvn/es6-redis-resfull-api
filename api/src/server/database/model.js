@@ -79,7 +79,8 @@ export default class Model {
             let ctx = {
                 req: req,
                 res: res,
-                instance: req.body
+                instance: req.body,
+                isNewInstance: true
             };
 
             this.beforeSave(ctx, (err = null) => {

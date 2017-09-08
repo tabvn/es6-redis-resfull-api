@@ -15,6 +15,17 @@ class User extends Model {
             return this.responseHandler(res, {toan: true});
         });
     }
+
+    beforeSave(ctx, next) {
+
+        // do your stuff inside this function before data is saved.
+        next();
+    }
+
+    afterSave(ctx, next) {
+        // to do after model is saved.
+        next();
+    }
 }
 
 export default User;
