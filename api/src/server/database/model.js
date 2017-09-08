@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import each from 'async/each';
 
 export default class Model {
 
@@ -20,10 +21,12 @@ export default class Model {
         this.responseHandler = this.responseHandler.bind(this);
         this.sort = this.sort.bind(this);
         this.router = this.router();
+        this.createIndexKey = this.createIndexKey.bind(this);
         this.modelDidLoad = this.modelDidLoad.bind(this);
         this.prepareData = this.prepareData.bind(this);
         this.beforeSave = this.beforeSave.bind(this);
         this.afterSave = this.afterSave.bind(this);
+
     }
 
     modelDidLoad() {
@@ -242,6 +245,10 @@ export default class Model {
 
         let errors = [];
         let data = {};
+        let uniqueFields = [];
+
+        let db = this.db;
+        let that = this;
 
 
         let fields = this.config.properties;
@@ -255,15 +262,53 @@ export default class Model {
                 data[field] = model[field];
             }
 
+            //check if unique
+            if (typeof fieldConfig.index !== 'undefined' && fieldConfig.index && typeof fieldConfig.unique !== 'undefined' && fieldConfig.unique && typeof model[field] !== 'undefined' && model[field] !== null) {
+                // we do need check Index. and unique
+                uniqueFields.push(field);
+
+            }
+
         });
 
         if (errors.length) {
             return callback(errors);
         } else {
 
-            return callback(null, data);
+
+            if (uniqueFields.length) {
+                each(uniqueFields, function (field, cb) {
+
+                    let key = that.createIndexKey(field, model[field]);
+                    db.scard(key, (err, num) => {
+
+                        console.log("Unuque checking for", field, err, num);
+                        if (err === null && num === 0) {
+                            return cb();
+                        } else {
+                            return cb(field + ' is must unique.');
+                        }
+                    });
+
+                }, function (err) {
+                    // if any of the file processing produced an error, err would equal that error
+                    if (err) {
+                        return callback(err)
+                    } else {
+                        return callback(null, data);
+                    }
+                });
+            } else {
+                return callback(null, data);
+
+            }
         }
 
+
+    }
+
+    createIndexKey(field, value) {
+        return 'index:' + this.name + ":" + field + ':' + value;
 
     }
 
@@ -288,6 +333,17 @@ export default class Model {
                                 return callback(err);
                             } else {
                                 db.sadd(this.plural, key);
+
+                                // add index key for later
+                                let fields = this.config.properties;
+                                _.each(fields, (fieldConfig, field) => {
+                                    if (typeof fieldConfig.index !== 'undefined' && fieldConfig.index && typeof data[field] !== 'undefined' && data[field] !== null) {
+                                        let indexKey = this.createIndexKey(field, data[field]);
+                                        db.sadd(indexKey, key);
+                                    }
+                                });
+
+
                                 return callback(null, model);
                             }
 

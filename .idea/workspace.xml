@@ -3,9 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="59a26a7f-07ef-4faf-9619-7089040b665b" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/api/src/common/models/user.js" afterPath="$PROJECT_DIR$/api/src/common/models/user.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/api/src/common/models/user.json" afterPath="$PROJECT_DIR$/api/src/common/models/user.json" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/api/src/model-config.js" afterPath="$PROJECT_DIR$/api/src/model-config.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/api/src/server/database/model.js" afterPath="$PROJECT_DIR$/api/src/server/database/model.js" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -32,8 +29,8 @@
       <file leaf-file-name="user.json" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/api/src/common/models/user.json">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="225">
-              <caret line="15" column="23" lean-forward="true" selection-start-line="15" selection-start-column="23" selection-end-line="15" selection-end-column="23" />
+            <state relative-caret-position="255">
+              <caret line="17" column="12" lean-forward="false" selection-start-line="17" selection-start-column="7" selection-end-line="17" selection-end-column="12" />
               <folding />
             </state>
           </provider>
@@ -54,9 +51,11 @@
       <file leaf-file-name="model.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/api/src/server/database/model.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-249">
-              <caret line="81" column="44" lean-forward="false" selection-start-line="81" selection-start-column="44" selection-end-line="81" selection-end-column="44" />
-              <folding />
+            <state relative-caret-position="348">
+              <caret line="335" column="0" lean-forward="true" selection-start-line="335" selection-start-column="0" selection-end-line="335" selection-end-column="0" />
+              <folding>
+                <element signature="e#0#23#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -76,6 +75,7 @@
   <component name="FindInProjectRecents">
     <findStrings>
       <find>Model</find>
+      <find>createIndexKey</find>
     </findStrings>
     <replaceStrings>
       <replace>user</replace>
@@ -348,12 +348,12 @@
       <updated>1504778679426</updated>
       <workItem from="1504778681748" duration="18298000" />
       <workItem from="1504831266656" duration="15000" />
-      <workItem from="1504860994316" duration="2484000" />
+      <workItem from="1504860994316" duration="4609000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="20797000" />
+    <option name="totallyTimeSpent" value="22922000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1280" height="714" extended-state="6" />
@@ -482,14 +482,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/api/src/common/models/user.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="225">
-          <caret line="15" column="23" lean-forward="true" selection-start-line="15" selection-start-column="23" selection-end-line="15" selection-end-column="23" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/api/src/server/api/index.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="120">
@@ -516,11 +508,21 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/api/src/common/models/user.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="17" column="12" lean-forward="false" selection-start-line="17" selection-start-column="7" selection-end-line="17" selection-end-column="12" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/api/src/server/database/model.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-249">
-          <caret line="81" column="44" lean-forward="false" selection-start-line="81" selection-start-column="44" selection-end-line="81" selection-end-column="44" />
-          <folding />
+        <state relative-caret-position="348">
+          <caret line="335" column="0" lean-forward="true" selection-start-line="335" selection-start-column="0" selection-end-line="335" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
