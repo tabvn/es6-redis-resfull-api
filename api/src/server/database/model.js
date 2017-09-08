@@ -60,6 +60,19 @@ export default class Model {
 
         });
 
+        router.get('/' + basePath + '/count', (req, res) => {
+
+            let filter = {};
+
+            that.count(filter, (err, count) => {
+                if (err) {
+                    return that.errorHandler(res, err)
+                } else {
+                    return that.responseHandler(res, {count: count});
+                }
+            });
+        });
+
 
         router.get('/' + basePath + '/:id', function (req, res) {
             that.findById(req.params.id, (err, obj) => {
