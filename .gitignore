@@ -1,6 +1,6 @@
-/api/dist
-/api/logs
-/npm-debug.log
-/api/node_modules
+dist
+logs
+npm-debug.log
+node_modules
 .DS_Store
 .idea

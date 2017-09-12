@@ -295,8 +295,6 @@ export default class Model {
 
                     let key = that.createIndexKey(field, model[field]);
                     db.scard(key, (err, num) => {
-
-                        console.log("Unuque checking for", field, err, num);
                         if (err === null && num === 0) {
                             return cb();
                         } else {
