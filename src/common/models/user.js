@@ -13,9 +13,12 @@ class User extends Model {
         let basePath = this.plural;
         let app = this.app;
         let that = this;
+
+
         // login router
         router.post('/' + basePath + '/login', (req, res) => {
 
+            console.log(req.headers);
             let body = req.body;
             if (!body || !body.email || !body.password) {
                 return this.errorHandler(res, "Email or password is required.");

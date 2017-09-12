@@ -9,7 +9,7 @@ import startApp from './server/database';
 import middleware from './server/middleware';
 import api from './server/api';
 import config, {explorer} from './config.json';
-import path from 'path';
+import Swagger from "./modules/swagger/index";
 
 
 let app = express();
@@ -30,6 +30,7 @@ app.use(bodyParser.json({
 app.set('superSecret', config.secret);
 app.set('jwt', jwt);
 app.set('bcrypt', bcrypt);
+app.set('root', __dirname);
 
 
 // connect to db
@@ -41,8 +42,10 @@ startApp(db => {
     app.use(middleware(app));
     // api router
     app.use('/api', api(app));
+
     if (explorer) {
-        app.use('/explorer', express.static(path.join(__dirname, 'swagger')));
+        let swagger = new Swagger(app);
+        app.set('swagger', swagger);
     }
 
     app.server.listen(process.env.PORT || config.port, () => {

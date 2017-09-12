@@ -12,5 +12,7 @@ export default (app) => {
         res.json({version});
     });
 
+    app.use('/', router);
+
     return router;
 }

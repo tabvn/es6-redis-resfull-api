@@ -1,5 +1,6 @@
 {
   "port": 8080,
+  "url": "0.0.0.0:8080/",
   "explorer": true,
   "bodyLimit": "100kb",
   "cors": [
