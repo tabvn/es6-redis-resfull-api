@@ -26,6 +26,7 @@ export default class Model {
         this.prepareData = this.prepareData.bind(this);
         this.beforeSave = this.beforeSave.bind(this);
         this.afterSave = this.afterSave.bind(this);
+        this.findOneByIndex = this.findOneByIndex.bind(this);
 
     }
 
@@ -340,6 +341,8 @@ export default class Model {
                     } else {
                         let key = this.name + ':' + count;
                         model.id = count;
+                        model.createdAt = Date.now();
+
                         db.hmset(key, data, (err) => {
                             if (err) {
                                 return callback(err);
@@ -367,6 +370,29 @@ export default class Model {
 
 
         });
+
+
+    }
+
+    findOneByIndex(indexKey, callback) {
+
+        if (!indexKey) {
+            return callback(new Error("Index key is required."));
+        }
+        let db = this.db;
+
+        db.smembers(indexKey, (err, members) => {
+            if (err === null && members && members.length) {
+                let memberKey = _.get(members, 0);
+                db.hgetall(memberKey, (err, obj) => {
+                    return callback(err, obj);
+                });
+
+            } else {
+                return callback(err ? err : new Error("Model not found."));
+            }
+
+        })
 
 
     }

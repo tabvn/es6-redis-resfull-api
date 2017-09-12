@@ -18,7 +18,8 @@
       "index": true
     },
     "password": {
-      "type": "string"
+      "type": "string",
+      "required": true
     },
     "createdAt": {
       "type": "date"
