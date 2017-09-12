@@ -13,7 +13,6 @@ class User extends Model {
         let basePath = this.plural;
         let app = this.app;
         let that = this;
-
         // login router
         router.post('/' + basePath + '/login', (req, res) => {
 
