@@ -8,7 +8,7 @@ import bodyParser from 'body-parser';
 import startApp from './server/database';
 import middleware from './server/middleware';
 import api from './server/api';
-import config from './config.json';
+import config, {explorer} from './config.json';
 import path from 'path';
 
 
@@ -41,8 +41,10 @@ startApp(db => {
     app.use(middleware(app));
     // api router
     app.use('/api', api(app));
+    if (explorer) {
+        app.use('/explorer', express.static(path.join(__dirname, 'swagger')));
+    }
 
-    app.use('/explorer', express.static(path.join(__dirname, 'swagger')));
     app.server.listen(process.env.PORT || config.port, () => {
         console.log(`App is running on port ${app.server.address().port}`);
     });
