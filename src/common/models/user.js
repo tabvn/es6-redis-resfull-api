@@ -1,5 +1,6 @@
 import modelConfig from './user.json';
 import Model from "../../server/database/model";
+import _ from 'lodash';
 
 class User extends Model {
     constructor(app) {
@@ -70,17 +71,28 @@ class User extends Model {
 
         // do your stuff inside this function before data is saved.
 
-        let app = this.app;
-        let bcrypt = app.get('bcrypt');
-        if (ctx.isNewInstance && ctx.instance.password) {
-            bcrypt.hash(ctx.instance.password, 10, function (err, hash) {
-                // Store hash in your password DB.
-                ctx.instance.password = hash;
-                next();
-            });
-        } else {
-            next();
-        }
+        super.beforeSave(ctx, (err) => {
+
+            let app = this.app;
+            let bcrypt = app.get('bcrypt');
+
+            let email = _.get(ctx, 'instance.email');
+            if (!_.isEmpty(email)) {
+                ctx.instance.email = _.toLower(email);
+            }
+            if (ctx.isNewInstance && ctx.instance.password) {
+                bcrypt.hash(ctx.instance.password, 10, function (err, hash) {
+                    // Store hash in your password DB.
+                    ctx.instance.password = hash;
+                    return next();
+                });
+            } else {
+                return next();
+            }
+
+        })
+
+
     }
 
     afterSave(ctx, next) {

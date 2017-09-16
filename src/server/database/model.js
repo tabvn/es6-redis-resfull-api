@@ -99,7 +99,7 @@ export default class Model {
 
             this.beforeSave(ctx, (err = null) => {
                 if (err) {
-                    this.errorHandler(res, err, 500);
+                    return this.errorHandler(res, err, 500);
                 } else {
                     that.create(ctx.instance, (err, obj) => {
                         if (err) {
@@ -110,9 +110,8 @@ export default class Model {
                             this.afterSave(ctx, (err = null) => {
                                 if (err) {
                                     return this.errorHandler(res, err, 500);
-                                } else {
-                                    return that.responseHandler(res, obj);
                                 }
+                                return that.responseHandler(res, obj);
                             });
 
                         }
@@ -151,7 +150,7 @@ export default class Model {
             let id = req.params.id;
             that.deleteById(id, (err, success) => {
                 if (err) {
-                    return that.errorHandler(res, error);
+                    return that.errorHandler(res, err);
                 }
                 else {
                     that.responseHandler(res, {count: success}, 204);
@@ -429,11 +428,20 @@ export default class Model {
     }
 
     errorHandler(res, err, code = 500) {
-        return res.status(code).json({error: err})
+        if (res.headersSent) {
+            return;
+        }
+        res.status(code);
+        return res.json({error: err})
     }
 
     responseHandler(res, data, code = 200) {
-        return res.status(code).json(data);
+        if (res.headersSent) {
+            return;
+        }
+
+        res.status(code);
+        return res.json(data);
     }
 
 }

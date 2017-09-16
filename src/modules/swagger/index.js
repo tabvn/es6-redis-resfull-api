@@ -1,5 +1,6 @@
-import express, {Router} from 'express';
+import express from 'express';
 import path from 'path';
+import _ from 'lodash';
 
 export default class Swagger {
 
@@ -13,6 +14,10 @@ export default class Swagger {
         this.createSwaggerJson = this.createSwaggerJson.bind(this)
         this.render = this.render.bind(this);
         this.setup();
+
+        this.routers = this.routers.bind(this);
+        this.modelDefinitions = this.modelDefinitions.bind(this);
+
     }
 
     setup() {
@@ -39,8 +44,204 @@ export default class Swagger {
 
     }
 
+
+    modelDefinitions() {
+        let app = this.app;
+        let models = app.get('models');
+
+        let definitions = {};
+
+        _.each(models, (model) => {
+
+            let modelConfig = _.get(model, 'config');
+
+            let modelName = _.get(modelConfig, 'name');
+            definitions = _.setWith(definitions, modelName, {
+                properties: _.get(modelConfig, 'properties'),
+                xml: {name: modelName},
+                type: 'object',
+
+            })
+
+        });
+
+        return definitions;
+
+    }
+
+    routers() {
+        
+        let routers = {
+            "/users": {
+                get: {
+                    tags: [
+                        "user"
+                    ],
+                    summary: "List of all users",
+                    description: "",
+                    operationId: "listUser",
+                    consumes: [
+                        "application/json"
+                    ],
+                    produces: [
+                        "application/json"
+                    ],
+                    parameters: [
+                        {
+                            "in": "query",
+                            "name": "filter",
+                            "description": "filter",
+                            "required": false,
+
+                        }
+                    ],
+                    responses: {
+                        "200": {
+                            description: "Success"
+                        },
+                        "500": {
+                            description: "Error"
+                        }
+                    },
+                    security: [
+                        {
+                            api_key: []
+                        }
+                    ]
+                }
+            },
+            "/users/{id}": {
+                get: {
+                    tags: [
+                        "user"
+                    ],
+                    summary: "Find User By ID",
+                    description: "",
+                    operationId: "getUserById",
+                    consumes: [
+                        "application/json"
+                    ],
+                    produces: [
+                        "application/json"
+                    ],
+                    parameters: [
+                        {
+                            "name": "id",
+                            "in": "path",
+                            "description": "ID of user to return",
+                            "required": true,
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    ],
+                    responses: {
+                        "200": {
+                            description: "Success"
+                        },
+                        "500": {
+                            description: "Error"
+                        }
+                    },
+                    security: [
+                        {
+                            api_key: []
+                        }
+                    ]
+                },
+                put: {
+                    tags: [
+                        "user"
+                    ],
+                    summary: "Update By Id",
+                    description: "",
+                    operationId: "updateById",
+                    consumes: [
+                        "application/json"
+                    ],
+                    produces: [
+                        "application/json"
+                    ],
+                    parameters: [
+                        {
+                            "name": "id",
+                            "in": "path",
+                            "description": "ID of user",
+                            "required": true,
+                            "type": "integer",
+                            "format": "int64"
+                        },
+                        {
+                            "in": "body",
+                            "name": "user",
+                            "description": "user object",
+                            "required": true,
+                            "schema": {
+                                "$ref": "#/definitions/user"
+                            }
+                        }
+                    ],
+                    responses: {
+                        "200": {
+                            description: "Success"
+                        },
+                        "500": {
+                            description: "Error"
+                        }
+                    },
+                    security: [
+                        {
+                            api_key: []
+                        }
+                    ]
+                },
+                delete: {
+                    tags: [
+                        "user"
+                    ],
+                    summary: "Find User By ID",
+                    description: "",
+                    operationId: "deleteById",
+                    consumes: [
+                        "application/json"
+                    ],
+                    produces: [
+                        "application/json"
+                    ],
+                    parameters: [
+                        {
+                            "name": "id",
+                            "in": "path",
+                            "description": "ID of user to delete",
+                            "required": true,
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    ],
+                    responses: {
+                        "204": {
+                            description: "Success"
+                        },
+                        "500": {
+                            description: "Error"
+                        }
+                    },
+                    security: [
+                        {
+                            api_key: []
+                        }
+                    ]
+                },
+            },
+
+        }
+
+        return routers;
+
+    }
+
     createSwaggerJson() {
 
+        let config = this.app.get('config');
         let data = {
             swagger: "2.0",
             info: {
@@ -48,337 +249,12 @@ export default class Swagger {
                 "version": "1.0.0",
                 "title": "Tabvn ES6 Redis Restful API"
             },
-            host: "0.0.0.0:8080",
+            host: config.host,
             basePath: "/api",
             schemes: [
                 "http"
             ],
-            paths: {
-                "/pet": {
-                    post: {
-                        tags: [
-                            "pet"
-                        ],
-                        summary: "Add a new pet to the store",
-                        description: "",
-                        operationId: "addPet",
-                        consumes: [
-                            "application/json"
-                        ],
-                        produces: [
-                            "application/json"
-                        ],
-                        parameters: [
-                            {
-                                "in": "body",
-                                "name": "body",
-                                "description": "Pet object that needs to be added to the store",
-                                "required": true,
-                                "schema": {
-                                    "$ref": "#/definitions/Pet"
-                                }
-                            }
-                        ],
-                        responses: {
-                            "405": {
-                                description: "Invalid input"
-                            }
-                        },
-                        security: [
-                            {
-                                api_key: []
-                            }
-                        ]
-                    }
-                },
-                "/users/login": {
-                    post: {
-                        "tags": [
-                            "pet"
-                        ],
-                        "summary": "User login",
-                        "description": "",
-                        "operationId": "userLogin",
-                        "consumes": [
-                            "application/json"
-                        ],
-                        "produces": [
-                            "application/json"
-                        ],
-                        "parameters": [
-                            {
-                                "in": "body",
-                                "name": "body",
-                                "description": "User Object",
-                                "required": true,
-                                "schema": {
-                                    "$ref": "#/definitions/Pet"
-                                }
-                            }
-                        ],
-                        "responses": {
-                            "405": {
-                                "description": "Invalid input"
-                            }
-                        },
-                        "security": [
-                            {
-                                "api_key": []
-                            }
-                        ]
-                    }
-                },
-                "/pet/findByStatus": {
-                    "get": {
-                        "tags": [
-                            "pet"
-                        ],
-                        "summary": "Finds Pets by status",
-                        "description": "Multiple status values can be provided with comma separated strings",
-                        "operationId": "findPetsByStatus",
-                        "produces": [
-                            "application/xml",
-                            "application/json"
-                        ],
-                        "parameters": [
-                            {
-                                "name": "status",
-                                "in": "query",
-                                "description": "Status values that need to be considered for filter",
-                                "required": true,
-                                "type": "array",
-                                "items": {
-                                    "type": "string",
-                                    "enum": [
-                                        "available",
-                                        "pending",
-                                        "sold"
-                                    ],
-                                    "default": "available"
-                                },
-                                "collectionFormat": "multi"
-                            }
-                        ],
-                        "responses": {
-                            "200": {
-                                "description": "successful operation",
-                                "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/definitions/Pet"
-                                    }
-                                }
-                            },
-                            "400": {
-                                "description": "Invalid status value"
-                            }
-                        },
-                        "security": [
-                            {
-                                "petstore_auth": [
-                                    "write:pets",
-                                    "read:pets"
-                                ]
-                            }
-                        ]
-                    }
-                },
-                "/pet/{id}": {
-                    "get": {
-                        "tags": [
-                            "pet"
-                        ],
-                        "summary": "Find pet by ID",
-                        "description": "Returns a single pet",
-                        "operationId": "getPetById",
-                        "produces": [
-                            "application/xml",
-                            "application/json"
-                        ],
-                        "parameters": [
-                            {
-                                "name": "id",
-                                "in": "path",
-                                "description": "ID of pet to return",
-                                "required": true,
-                                "type": "integer",
-                                "format": "int64"
-                            }
-                        ],
-                        "responses": {
-                            "200": {
-                                "description": "successful operation",
-                                "schema": {
-                                    "$ref": "#/definitions/Pet"
-                                }
-                            },
-                            "400": {
-                                "description": "Invalid ID supplied"
-                            },
-                            "404": {
-                                "description": "Pet not found"
-                            }
-                        },
-                        "security": [
-                            {
-                                "api_key": []
-                            }
-                        ]
-                    },
-                    "post": {
-                        "tags": [
-                            "pet"
-                        ],
-                        "summary": "Updates a pet in the store with form data",
-                        "description": "",
-                        "operationId": "updatePetWithForm",
-                        "consumes": [
-                            "application/x-www-form-urlencoded"
-                        ],
-                        "produces": [
-                            "application/xml",
-                            "application/json"
-                        ],
-                        "parameters": [
-                            {
-                                "name": "petId",
-                                "in": "path",
-                                "description": "ID of pet that needs to be updated",
-                                "required": true,
-                                "type": "integer",
-                                "format": "int64"
-                            },
-                            {
-                                "name": "name",
-                                "in": "formData",
-                                "description": "Updated name of the pet",
-                                "required": false,
-                                "type": "string"
-                            },
-                            {
-                                "name": "status",
-                                "in": "formData",
-                                "description": "Updated status of the pet",
-                                "required": false,
-                                "type": "string"
-                            }
-                        ],
-                        "responses": {
-                            "405": {
-                                "description": "Invalid input"
-                            }
-                        },
-                        "security": [
-                            {
-                                "petstore_auth": [
-                                    "write:pets",
-                                    "read:pets"
-                                ]
-                            }
-                        ]
-                    },
-                    "delete": {
-                        "tags": [
-                            "pet"
-                        ],
-                        "summary": "Deletes a pet",
-                        "description": "",
-                        "operationId": "deletePet",
-                        "produces": [
-                            "application/xml",
-                            "application/json"
-                        ],
-                        "parameters": [
-                            {
-                                "name": "api_key",
-                                "in": "header",
-                                "required": false,
-                                "type": "string"
-                            },
-                            {
-                                "name": "petId",
-                                "in": "path",
-                                "description": "Pet id to delete",
-                                "required": true,
-                                "type": "integer",
-                                "format": "int64"
-                            }
-                        ],
-                        "responses": {
-                            "400": {
-                                "description": "Invalid ID supplied"
-                            },
-                            "404": {
-                                "description": "Pet not found"
-                            }
-                        },
-                        "security": [
-                            {
-                                "petstore_auth": [
-                                    "write:pets",
-                                    "read:pets"
-                                ]
-                            }
-                        ]
-                    }
-                },
-                "/pet/{petId}/uploadImage": {
-                    "post": {
-                        "tags": [
-                            "pet"
-                        ],
-                        "summary": "uploads an image",
-                        "description": "",
-                        "operationId": "uploadFile",
-                        "consumes": [
-                            "multipart/form-data"
-                        ],
-                        "produces": [
-                            "application/json"
-                        ],
-                        "parameters": [
-                            {
-                                "name": "petId",
-                                "in": "path",
-                                "description": "ID of pet to update",
-                                "required": true,
-                                "type": "integer",
-                                "format": "int64"
-                            },
-                            {
-                                "name": "additionalMetadata",
-                                "in": "formData",
-                                "description": "Additional data to pass to server",
-                                "required": false,
-                                "type": "string"
-                            },
-                            {
-                                "name": "file",
-                                "in": "formData",
-                                "description": "file to upload",
-                                "required": false,
-                                "type": "file"
-                            }
-                        ],
-                        "responses": {
-                            "200": {
-                                "description": "successful operation",
-                                "schema": {
-                                    "$ref": "#/definitions/ApiResponse"
-                                }
-                            }
-                        },
-                        "security": [
-                            {
-                                "petstore_auth": [
-                                    "write:pets",
-                                    "read:pets"
-                                ]
-                            }
-                        ]
-                    }
-                }
-            },
+            paths: {},
             "securityDefinitions": {
                 "api_key": {
                     "type": "apiKey",
@@ -386,61 +262,11 @@ export default class Swagger {
                     "in": "header"
                 }
             },
-            "definitions": {
-                "User": {
-                    "type": "object",
-                    "properties": {
-                        "id": {
-                            "type": "integer",
-                            "format": "int64"
-                        },
-                        "username": {
-                            "type": "string"
-                        },
-                        "firstName": {
-                            "type": "string"
-                        },
-                        "lastName": {
-                            "type": "string"
-                        },
-                        "email": {
-                            "type": "string"
-                        },
-                        "password": {
-                            "type": "string"
-                        },
-                        "phone": {
-                            "type": "string"
-                        },
-                        "userStatus": {
-                            "type": "integer",
-                            "format": "int32",
-                            "description": "User Status"
-                        }
-                    },
-                    "xml": {
-                        "name": "User"
-                    }
-                },
-                "ApiResponse": {
-                    "type": "object",
-                    "properties": {
-                        "code": {
-                            "type": "integer",
-                            "format": "int32"
-                        },
-                        "type": {
-                            "type": "string"
-                        },
-                        "message": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
+            "definitions": {}
         };
 
-
+        data.paths = Object.assign(data.paths, this.routers());
+        data.definitions = Object.assign(data.definitions, this.modelDefinitions())
         return data;
     }
 
@@ -456,14 +282,13 @@ export default class Swagger {
 
 
         let config = this.app.get('config');
-
-        let explorerURL = 'http://' + config.url + 'explorer/';
+        let explorerURL = 'http://' + config.host + '/explorer/';
 
         return '<!DOCTYPE html>\n' +
             '<html lang="en">\n' +
             '<head>\n' +
             '    <meta charset="UTF-8">\n' +
-            '    <title>Explorer</title>\n' +
+            '    <title>Tabvn</title>\n' +
             '    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Source+Code+Pro:300,600|Titillium+Web:400,600,700"\n' +
             '          rel="stylesheet">\n' +
             '    <link rel="stylesheet" type="text/css" href="./public/swagger-ui.css">\n' +
