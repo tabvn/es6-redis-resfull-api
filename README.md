@@ -1,5 +1,5 @@
 
-# Create Restful sevvice with Express 4,Redis Database.
+# Create Restful service with Express 4,Redis Database.
  
 ``` 
 cd api
