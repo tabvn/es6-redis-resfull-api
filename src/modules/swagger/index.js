@@ -46,6 +46,7 @@ export default class Swagger {
 
 
     modelDefinitions() {
+
         let app = this.app;
         let models = app.get('models');
 
@@ -61,7 +62,7 @@ export default class Swagger {
                 xml: {name: modelName},
                 type: 'object',
 
-            })
+            });
 
         });
 
@@ -70,16 +71,31 @@ export default class Swagger {
     }
 
     routers() {
-        
-        let routers = {
-            "/users": {
+
+        let models = this.app.get('models');
+
+        let routers = {};
+
+
+        _.each(models, (model) => {
+            let modelConfig = _.get(model, 'config');
+            let modelName = _.get(modelConfig, 'name');
+            let modelPlural = modelConfig.plural;
+            let methods = _.get(modelConfig, 'methods', []);
+
+            let modelRouter = {};
+
+
+            //
+            modelRouter = _.setWith(modelRouter, '/' + modelPlural, {
+                // find all
                 get: {
                     tags: [
-                        "user"
+                        modelName
                     ],
-                    summary: "List of all users",
+                    summary: "Find all " + modelPlural,
                     description: "",
-                    operationId: "listUser",
+                    operationId: "findAll",
                     consumes: [
                         "application/json"
                     ],
@@ -108,16 +124,57 @@ export default class Swagger {
                             api_key: []
                         }
                     ]
-                }
-            },
-            "/users/{id}": {
-                get: {
+                },
+                // create
+                post: {
                     tags: [
-                        "user"
+                        modelName
                     ],
-                    summary: "Find User By ID",
+                    summary: "Create " + modelName,
                     description: "",
-                    operationId: "getUserById",
+                    operationId: "create",
+                    consumes: [
+                        "application/json"
+                    ],
+                    produces: [
+                        "application/json"
+                    ],
+                    parameters: [
+                        {
+                            "in": "body",
+                            "name": modelName,
+                            "description": modelName + ' object',
+                            "required": true,
+                            "schema": {
+                                "$ref": "#/definitions/" + modelName
+                            }
+
+                        }
+                    ],
+                    responses: {
+                        "200": {
+                            description: "Success"
+                        },
+                        "500": {
+                            description: "Error"
+                        }
+                    },
+                    security: [
+                        {
+                            api_key: []
+                        }
+                    ]
+                }
+            });
+
+
+            modelRouter = _.setWith(modelRouter, '/' + modelPlural + '/{id}', {
+                // findById
+                get: {
+                    tags: [modelName],
+                    summary: "Find " + modelName + " by ID",
+                    description: "",
+                    operationId: "findById",
                     consumes: [
                         "application/json"
                     ],
@@ -128,7 +185,7 @@ export default class Swagger {
                         {
                             "name": "id",
                             "in": "path",
-                            "description": "ID of user to return",
+                            "description": modelName + " ID",
                             "required": true,
                             "type": "integer",
                             "format": "int64"
@@ -149,10 +206,8 @@ export default class Swagger {
                     ]
                 },
                 put: {
-                    tags: [
-                        "user"
-                    ],
-                    summary: "Update By Id",
+                    tags: [modelName],
+                    summary: "Update +" + modelName + " by ID",
                     description: "",
                     operationId: "updateById",
                     consumes: [
@@ -165,18 +220,18 @@ export default class Swagger {
                         {
                             "name": "id",
                             "in": "path",
-                            "description": "ID of user",
+                            "description": modelName + " ID",
                             "required": true,
                             "type": "integer",
                             "format": "int64"
                         },
                         {
                             "in": "body",
-                            "name": "user",
-                            "description": "user object",
+                            "name": modelName,
+                            "description": modelName + " object",
                             "required": true,
                             "schema": {
-                                "$ref": "#/definitions/user"
+                                "$ref": "#/definitions/" + modelName
                             }
                         }
                     ],
@@ -195,12 +250,10 @@ export default class Swagger {
                     ]
                 },
                 delete: {
-                    tags: [
-                        "user"
-                    ],
-                    summary: "Find User By ID",
+                    tags: [modelName],
+                    summary: "Destroy " + modelName + " by ID",
                     description: "",
-                    operationId: "deleteById",
+                    operationId: "destroyById",
                     consumes: [
                         "application/json"
                     ],
@@ -211,7 +264,7 @@ export default class Swagger {
                         {
                             "name": "id",
                             "in": "path",
-                            "description": "ID of user to delete",
+                            "description": modelName + " ID",
                             "required": true,
                             "type": "integer",
                             "format": "int64"
@@ -231,9 +284,85 @@ export default class Swagger {
                         }
                     ]
                 },
-            },
+            });
 
-        }
+
+            let customMethods = {};
+
+
+            _.each(methods, (method, key) => {
+
+                console.log(key);
+
+                let methodPath = '/' + modelPlural + key;
+
+
+                _.each(method, (methodObject, indexKey) => {
+
+                    methodObject = _.setWith(methodObject, 'tags', [modelName]);
+                    methodObject = _.setWith(methodObject, 'security', [
+                        {
+                            "api_key": []
+                        }
+                    ]);
+
+
+                    methodObject = _.setWith(methodObject, 'consumes', [
+                        "application/json"
+                    ]);
+
+                    methodObject = _.setWith(methodObject, 'produces', [
+                        "application/json"
+                    ]);
+
+
+                    let parameters = _.get(methodObject, 'parameters', []);
+
+                    _.each(parameters, (parameter, paramIndex) => {
+
+                        if (!_.get(parameter, 'schema', null) && _.get(parameter, 'type', null) === modelName) {
+
+                            parameter = _.setWith(parameter, 'schema', {
+                                "$ref": "#/definitions/" + modelName
+                            });
+
+                        } else {
+
+                            if (_.get(parameter, 'type', null) === 'object') {
+
+                                parameter = _.setWith(parameter, 'schema', {
+                                    type: 'object'
+                                });
+                                parameter = _.setWith(parameter, 'required', false);
+                            }
+                            if (_.get(parameter, 'type', null) === 'array') {
+                                parameter = _.setWith(parameter, 'schema', {
+                                    type: 'array'
+
+                                });
+                                parameter = _.setWith(parameter, 'required', false);
+                            }
+
+                        }
+
+                        parameters = _.setWith(parameters, paramIndex, parameter);
+
+                    });
+
+                    methodObject = _.setWith(methodObject, 'parameters', parameters);
+
+                    method = _.setWith(method, indexKey, methodObject);
+                });
+
+                customMethods = _.setWith(customMethods, methodPath, method);
+
+            });
+
+            modelRouter = Object.assign(modelRouter, customMethods);
+            routers = Object.assign(routers, modelRouter);
+
+
+        });
 
         return routers;
 

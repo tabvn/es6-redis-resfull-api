@@ -21,7 +21,7 @@
       "type": "string",
       "required": true
     },
-    "active":{
+    "active": {
       "type": "boolean"
     },
     "createdAt": {
@@ -29,6 +29,33 @@
     },
     "updatedAt": {
       "type": "date"
+    }
+  },
+  "methods": {
+    "/login": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Login",
+        "operationId": "login",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "user",
+            "type": "object",
+            "description": "user credentials"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "500": {
+            "description": "Error"
+          }
+        }
+      }
     }
   }
 }

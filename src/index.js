@@ -23,6 +23,7 @@ app.use(cors({
     exposedHeaders: config.cors
 }));
 
+
 app.use(bodyParser.json({
     limit: config.bodyLimit
 }));
