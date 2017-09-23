@@ -12,6 +12,8 @@ cd api
 npm run dev
 
  ```
+ 
+Use Swagger browser: http://localhost:8080/explorer 
     
 ##### Build
 ```
